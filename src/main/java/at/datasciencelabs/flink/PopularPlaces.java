@@ -36,7 +36,7 @@ public class PopularPlaces {
         // create automatic watermarks every second
         executionEnvironment.getConfig().setAutoWatermarkInterval(1000);
 
-        DataStream<TaxiRide> dataStream = executionEnvironment.addSource(TaxiRideKafkaFactory.getKafkaConsumer());
+        DataStream<TaxiRide> dataStream = executionEnvironment.addSource(TaxiRideKafkaFactory.createKafkaConsumer());
 
         SingleOutputStreamOperator<Tuple5<Float, Float, Long, Boolean, Integer>> popularPlacesStream = dataStream.filter(new FilterFunction<TaxiRide>() {
             @Override
@@ -74,8 +74,8 @@ public class PopularPlaces {
             }
         }).map(new MapFunction<Tuple4<Integer, Long, Boolean, Integer>, Tuple5<Float, Float, Long, Boolean, Integer>>() {
             @Override
-            public Tuple5<Float, Float, Long, Boolean, Integer> map(Tuple4<Integer, Long, Boolean, Integer> filteredRide) throws Exception {
-                return new Tuple5<>(GeoUtils.getGridCellCenterLon(filteredRide.f0), GeoUtils.getGridCellCenterLat(filteredRide.f0), filteredRide.f1, filteredRide.f2, filteredRide.f3);
+            public Tuple5<Float, Float, Long, Boolean, Integer> map(Tuple4<Integer, Long, Boolean, Integer> popularRide) throws Exception {
+                return new Tuple5<>(GeoUtils.getGridCellCenterLon(popularRide.f0), GeoUtils.getGridCellCenterLat(popularRide.f0), popularRide.f1, popularRide.f2, popularRide.f3);
             }
         });
 

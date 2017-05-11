@@ -4,14 +4,10 @@ import com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRi
 import com.dataartisans.flinktraining.exercises.datastream_java.sources.TaxiRideSource;
 import com.dataartisans.flinktraining.exercises.datastream_java.utils.GeoUtils;
 
-import com.dataartisans.flinktraining.exercises.datastream_java.utils.TaxiRideSchema;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer010;
-
-import java.util.Properties;
 
 public class TaxiRideExercise {
 
@@ -31,7 +27,7 @@ public class TaxiRideExercise {
             }
         });
 
-        ridesInNYC.addSink(TaxiRideKafkaFactory.getKafkaProducer());
+        ridesInNYC.addSink(TaxiRideKafkaFactory.createKafkaProducer());
         ridesInNYC.print();
 
         environment.execute("Taxi Rides in NYC");
