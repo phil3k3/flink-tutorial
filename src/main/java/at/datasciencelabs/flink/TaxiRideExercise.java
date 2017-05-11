@@ -4,10 +4,12 @@ import com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRi
 import com.dataartisans.flinktraining.exercises.datastream_java.sources.TaxiRideSource;
 import com.dataartisans.flinktraining.exercises.datastream_java.utils.GeoUtils;
 
+import com.dataartisans.flinktraining.exercises.datastream_java.utils.TaxiRideSchema;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer010;
 
 import java.util.Properties;
 
@@ -19,12 +21,7 @@ public class TaxiRideExercise {
 
         environment.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-        Properties properties = new Properties();
-        properties.setProperty("zookeeper.connect", "localhost:2181");
-        properties.setProperty("bootstrap.servers", "localhost:9092");
-        properties.setProperty("group.id", "myGroup");
-
-        DataStream<TaxiRide> rides = environment.addSource(new TaxiRideSource("/home/lip/projects/flinkquickstart/nycTaxiRides.gz", 60));
+        DataStream<TaxiRide> rides = environment.addSource(new TaxiRideSource("/home/phil3k/projects/flink-tutorial/nycTaxiRides.gz", 60));
 
         DataStream<TaxiRide> ridesInNYC = rides.filter(new FilterFunction<TaxiRide>() {
             @Override
@@ -34,8 +31,11 @@ public class TaxiRideExercise {
             }
         });
 
+        ridesInNYC.addSink(TaxiRideKafkaFactory.getKafkaProducer());
         ridesInNYC.print();
 
         environment.execute("Taxi Rides in NYC");
     }
+
+
 }
