@@ -3,11 +3,12 @@ package at.datasciencelabs.flink;
 import com.dataartisans.flinktraining.exercises.datastream_java.datatypes.ConnectedCarEvent;
 import com.dataartisans.flinktraining.exercises.datastream_java.datatypes.GapSegment;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
-import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
+import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -36,7 +37,8 @@ public class ConnectedCarExercise {
                     }
                 })
                 .assignTimestampsAndWatermarks(new ConnectedCarEventAssignerWithPeriodicWatermarks(timeLag))
-                .windowAll(EventTimeSessionWindows.withGap(Time.seconds(15)))
+                .keyBy("carId")
+                .window(EventTimeSessionWindows.withGap(Time.seconds(15)))
                 .apply(new GapSegmentTimeWindowAllWindowFunction()).print();
 
         executionEnvironment.execute("Connected Cars");
@@ -65,9 +67,9 @@ public class ConnectedCarExercise {
         }
     }
 
-    private static class GapSegmentTimeWindowAllWindowFunction implements AllWindowFunction<ConnectedCarEvent, GapSegment, TimeWindow> {
+    private static class GapSegmentTimeWindowAllWindowFunction implements WindowFunction<ConnectedCarEvent, GapSegment, Tuple, TimeWindow> {
         @Override
-        public void apply(TimeWindow timeWindow, Iterable<ConnectedCarEvent> iterable, Collector<GapSegment> collector) throws Exception {
+        public void apply(Tuple tuple, TimeWindow timeWindow, Iterable<ConnectedCarEvent> iterable, Collector<GapSegment> collector) throws Exception {
             collector.collect(new GapSegment(iterable));
         }
     }
