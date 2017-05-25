@@ -7,15 +7,11 @@ import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
-import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
-
-import javax.annotation.Nullable;
 
 public class ConnectedCarExercise {
 
@@ -42,29 +38,6 @@ public class ConnectedCarExercise {
                 .apply(new GapSegmentTimeWindowAllWindowFunction()).print();
 
         executionEnvironment.execute("Connected Cars");
-    }
-
-    private static class ConnectedCarEventAssignerWithPeriodicWatermarks implements AssignerWithPeriodicWatermarks<ConnectedCarEvent> {
-
-        private final long timeLag;
-        private long currentMaxTimestamp;
-
-        ConnectedCarEventAssignerWithPeriodicWatermarks(long timeLag) {
-            this.timeLag = timeLag;
-        }
-
-        @Nullable
-        @Override
-        public Watermark getCurrentWatermark() {
-            return new Watermark(currentMaxTimestamp - timeLag);
-        }
-
-        @Override
-        public long extractTimestamp(ConnectedCarEvent connectedCarEvent, long previousElementTimestamp) {
-            long timestamp = connectedCarEvent.timestamp;
-            currentMaxTimestamp = Math.max(timestamp, previousElementTimestamp);
-            return timestamp;
-        }
     }
 
     private static class GapSegmentTimeWindowAllWindowFunction implements WindowFunction<ConnectedCarEvent, GapSegment, Tuple, TimeWindow> {
