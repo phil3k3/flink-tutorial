@@ -15,7 +15,7 @@ import java.util.PriorityQueue;
 
 /**
  * State-ful function which uses a {@link PriorityQueue} to sort the out of order events. As soon
- * as the register timer's expire, the events in the queue are evaluated against the current watermark
+ * as the registered timer's expire, the events in the queue are evaluated against the current watermark
  * and released as soon as the watermark gets high enough for them to be released.
  */
 class SortConnectedCarEventsFunction extends RichProcessFunction<ConnectedCarEvent, ConnectedCarEvent> {
@@ -57,7 +57,7 @@ class SortConnectedCarEventsFunction extends RichProcessFunction<ConnectedCarEve
     }
 
     /**
-     * Evaluates all (already sorted) events in the  queue and emits those smaller than the current watermark
+     * Evaluates all (already sorted) events in the  queue and emits those smaller or equal than the current watermark
      */
     @Override
     public void onTimer(long l, OnTimerContext onTimerContext, Collector<ConnectedCarEvent> collector) throws Exception {
